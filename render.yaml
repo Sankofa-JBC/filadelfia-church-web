@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: filadelfia-whatsapp-backend
+    runtime: node
+    plan: free
+    region: virginia
+    rootDir: backend
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: META_WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: META_WHATSAPP_PHONE_NUMBER_ID
+        sync: false

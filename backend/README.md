@@ -33,6 +33,16 @@ npm run typecheck
 npm test
 ```
 
+## Deploy
+
+O deploy inicial recomendado esta documentado em:
+
+```text
+backend/docs/deploy-render.md
+```
+
+O repositorio tambem possui `render.yaml` na raiz para criar o Web Service no Render.
+
 ## Variaveis de ambiente
 
 Crie um arquivo `.env` a partir de `.env.example`.
@@ -116,3 +126,11 @@ Resposta esperada:
 - Cadastro de contatos.
 - IA com Gemini.
 - Painel administrativo.
+
+## Proxima etapa: Meta
+
+O checklist para conectar o webhook na WhatsApp Cloud API esta em:
+
+```text
+backend/docs/meta-whatsapp-setup.md
+```
