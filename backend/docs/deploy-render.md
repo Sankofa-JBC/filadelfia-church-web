@@ -16,7 +16,7 @@ O arquivo `render.yaml` na raiz do repositorio define:
 
 - servico web Node.js;
 - pasta raiz `backend`;
-- build com `npm ci && npm run build`;
+- build com `npm ci --include=dev && npm run build`;
 - start com `npm start`;
 - health check em `/health`;
 - variaveis sensiveis como `sync: false`.
@@ -54,3 +54,14 @@ Resposta esperada:
 - O plano gratuito pode dormir apos um periodo sem uso. Para webhook real em producao, isso pode atrasar a primeira resposta.
 - Nao coloque tokens reais em `.env.example`, README, commits ou mensagens publicas.
 - A URL do Render sera usada no painel da Meta como Callback URL do webhook.
+
+## Se precisar editar manualmente no Render
+
+Na tela do servico, use estes valores:
+
+```text
+Build Command: npm ci --include=dev && npm run build
+Start Command: npm start
+```
+
+Nao cole `buildCommand:` dentro do campo **Build Command**. Esse texto pertence apenas ao arquivo `render.yaml`; se for colado na interface, o Render tentara executar `buildCommand:` como comando de terminal e o deploy falhara com status 127.
