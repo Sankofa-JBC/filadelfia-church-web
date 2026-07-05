@@ -31,6 +31,7 @@ O arquivo `render.yaml` na raiz do repositorio define:
 WHATSAPP_VERIFY_TOKEN=crie-um-token-forte
 META_WHATSAPP_ACCESS_TOKEN=preencher-depois
 META_WHATSAPP_PHONE_NUMBER_ID=preencher-depois
+META_GRAPH_API_VERSION=v24.0
 ```
 
 4. Aguarde o deploy terminar.

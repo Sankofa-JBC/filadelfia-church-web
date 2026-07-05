@@ -2,7 +2,7 @@
 
 Backend minimo para preparar uma futura automacao oficial de atendimento pelo WhatsApp usando a WhatsApp Business Platform / Cloud API da Meta.
 
-Este MVP nao envia mensagens e nao depende de uma conta real da Meta. Ele apenas prepara rotas locais para health check, verificacao futura de webhook e recebimento de payloads simulados.
+Este MVP prepara rotas para health check, verificacao de webhook, recebimento de payloads e envio de respostas automaticas pela WhatsApp Cloud API. O envio real depende das credenciais da Meta configuradas no ambiente.
 
 ## Requisitos
 
@@ -52,6 +52,9 @@ NODE_ENV=development
 PORT=3000
 HOST=0.0.0.0
 WHATSAPP_VERIFY_TOKEN=troque-este-token-local
+META_WHATSAPP_ACCESS_TOKEN=
+META_WHATSAPP_PHONE_NUMBER_ID=
+META_GRAPH_API_VERSION=v24.0
 ```
 
 Nao commitar `.env` real. Tokens da Meta e chaves de IA devem ficar apenas no backend.
@@ -84,7 +87,7 @@ abc123
 
 ### POST /webhook/whatsapp
 
-Recebe payloads simulados e registra logs basicos das mensagens recebidas.
+Recebe payloads simulados, registra logs basicos das mensagens recebidas e tenta enviar uma resposta automatica. Sem credenciais da Meta, o envio e ignorado com seguranca.
 
 ```powershell
 $body = @{
@@ -112,6 +115,11 @@ Resposta esperada:
 
 ```json
 {
+  "replies": {
+    "failed": 0,
+    "sent": 0,
+    "skipped": 1
+  },
   "status": "received",
   "receivedMessages": 1
 }
@@ -119,7 +127,6 @@ Resposta esperada:
 
 ## Escopo fora do MVP 1
 
-- Envio real pela Cloud API.
 - Templates aprovados pela Meta.
 - Mensagens ativas fora da janela de 24 horas.
 - Banco de dados.

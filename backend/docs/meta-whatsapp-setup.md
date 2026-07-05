@@ -10,6 +10,7 @@ Este backend ja possui as rotas necessarias para a primeira verificacao de webho
 - WhatsApp Business Account.
 - Phone Number ID.
 - Access Token da Cloud API.
+- Graph API Version, atualmente configurada como `v24.0`.
 
 ## Callback URL
 
@@ -44,9 +45,10 @@ Quando formos enviar respostas reais pelo WhatsApp, o Render tambem precisara de
 ```text
 META_WHATSAPP_ACCESS_TOKEN=
 META_WHATSAPP_PHONE_NUMBER_ID=
+META_GRAPH_API_VERSION=v24.0
 ```
 
-Essas variaveis ja estao reservadas, mas o codigo atual ainda nao envia mensagens.
+Com essas variaveis preenchidas, o backend consegue enviar respostas automaticas de texto pela Cloud API.
 
 ## Estado atual
 
@@ -55,11 +57,12 @@ Ja implementado:
 - `GET /webhook/whatsapp` para verificacao da Meta;
 - `POST /webhook/whatsapp` para receber payloads de mensagens;
 - validacao basica de payload com Zod;
-- logs das mensagens recebidas.
+- logs das mensagens recebidas;
+- respostas automaticas para cultos, localizacao, pedidos de oracao e contato;
+- envio de texto pela WhatsApp Cloud API quando as credenciais estao configuradas.
 
 Ainda nao implementado:
 
-- envio real de respostas via Cloud API;
 - templates aprovados pela Meta;
 - persistencia em banco;
 - painel administrativo;

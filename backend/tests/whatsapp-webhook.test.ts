@@ -17,6 +17,9 @@ afterEach(async () => {
   await app?.close();
   app = undefined;
   delete process.env.WHATSAPP_VERIFY_TOKEN;
+  delete process.env.META_WHATSAPP_ACCESS_TOKEN;
+  delete process.env.META_WHATSAPP_PHONE_NUMBER_ID;
+  delete process.env.META_GRAPH_API_VERSION;
 });
 
 describe("GET /webhook/whatsapp", () => {
@@ -62,6 +65,11 @@ describe("POST /webhook/whatsapp", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
+      replies: {
+        failed: 0,
+        sent: 0,
+        skipped: 1
+      },
       status: "received",
       receivedMessages: 1
     });

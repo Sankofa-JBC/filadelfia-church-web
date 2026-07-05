@@ -6,6 +6,7 @@ import {
   logIncomingMessages,
   validateWebhookPayload
 } from "../services/whatsapp/whatsapp-message.service.js";
+import { replyToIncomingMessages } from "../services/whatsapp/whatsapp-reply.service.js";
 
 const webhookVerificationQuerySchema = z.object({
   "hub.mode": z.string().optional(),
@@ -61,8 +62,10 @@ export const registerWhatsAppWebhookRoutes = async (
 
     const messages = extractIncomingMessages(validation.payload);
     logIncomingMessages(request.log, messages);
+    const replies = await replyToIncomingMessages(request.log, messages);
 
     return reply.code(200).send({
+      replies,
       status: "received",
       receivedMessages: messages.length
     });

@@ -20,3 +20,5 @@ services:
         sync: false
       - key: META_WHATSAPP_PHONE_NUMBER_ID
         sync: false
+      - key: META_GRAPH_API_VERSION
+        value: v24.0

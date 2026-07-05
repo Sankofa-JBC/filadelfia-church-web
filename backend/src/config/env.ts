@@ -5,6 +5,9 @@ export interface AppEnv {
   port: number;
   host: string;
   whatsappVerifyToken: string;
+  metaGraphApiVersion: string;
+  metaWhatsAppAccessToken?: string;
+  metaWhatsAppPhoneNumberId?: string;
 }
 
 const parsePort = (value: string | undefined): number => {
@@ -31,6 +34,9 @@ export const getEnv = (): AppEnv => {
     nodeEnv,
     port: parsePort(process.env.PORT),
     host: process.env.HOST ?? "0.0.0.0",
-    whatsappVerifyToken
+    whatsappVerifyToken,
+    metaGraphApiVersion: process.env.META_GRAPH_API_VERSION ?? "v24.0",
+    metaWhatsAppAccessToken: process.env.META_WHATSAPP_ACCESS_TOKEN || undefined,
+    metaWhatsAppPhoneNumberId: process.env.META_WHATSAPP_PHONE_NUMBER_ID || undefined
   };
 };
