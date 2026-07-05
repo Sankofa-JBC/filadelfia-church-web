@@ -1,13 +1,12 @@
 # Backend WhatsApp - Igreja Missionaria Filadelfia
 
-Backend minimo para preparar uma futura automacao oficial de atendimento pelo WhatsApp usando a WhatsApp Business Platform / Cloud API da Meta.
-
-Este MVP prepara rotas para health check, verificacao de webhook, recebimento de payloads e envio de respostas automaticas pela WhatsApp Cloud API. O envio real depende das credenciais da Meta configuradas no ambiente.
+Backend para automacao de atendimento pelo WhatsApp usando Baileys e WhatsApp Web como aparelho conectado. Este fluxo nao usa a WhatsApp Cloud API da Meta.
 
 ## Requisitos
 
-- Node.js 20 ou superior
+- Node.js 24.x
 - npm
+- WhatsApp no celular para escanear o QR Code
 
 ## Configuracao local
 
@@ -15,10 +14,16 @@ Este MVP prepara rotas para health check, verificacao de webhook, recebimento de
 cd backend
 npm install
 Copy-Item .env.example .env
-npm run dev
+npm run bot:dev
 ```
 
-Por padrao, o servidor roda em:
+Quando o QR Code aparecer no terminal, abra o WhatsApp no celular e use:
+
+```text
+Aparelhos conectados > Conectar aparelho
+```
+
+Por padrao, o servidor HTTP roda em:
 
 ```text
 http://localhost:3000
@@ -27,21 +32,13 @@ http://localhost:3000
 ## Scripts
 
 ```powershell
+npm run bot:dev
+npm run bot:start
 npm run dev
 npm run build
 npm run typecheck
 npm test
 ```
-
-## Deploy
-
-O deploy inicial recomendado esta documentado em:
-
-```text
-backend/docs/deploy-render.md
-```
-
-O repositorio tambem possui `render.yaml` na raiz para criar o Web Service no Render.
 
 ## Variaveis de ambiente
 
@@ -51,13 +48,19 @@ Crie um arquivo `.env` a partir de `.env.example`.
 NODE_ENV=development
 PORT=3000
 HOST=0.0.0.0
-WHATSAPP_VERIFY_TOKEN=troque-este-token-local
-META_WHATSAPP_ACCESS_TOKEN=
-META_WHATSAPP_PHONE_NUMBER_ID=
-META_GRAPH_API_VERSION=v24.0
+WHATSAPP_BOT_ENABLED=false
+WHATSAPP_SESSION_DIR=.session/baileys
+WHATSAPP_IGNORE_GROUPS=true
+WHATSAPP_MIN_REPLY_INTERVAL_MS=60000
 ```
 
-Nao commitar `.env` real. Tokens da Meta e chaves de IA devem ficar apenas no backend.
+O script `npm run bot:dev` ativa `WHATSAPP_BOT_ENABLED=true` automaticamente.
+
+Nao commitar `.env` real nem a pasta `.session`. A sessao do WhatsApp fica salva em:
+
+```text
+backend/.session/baileys
+```
 
 ## Endpoints
 
@@ -69,75 +72,46 @@ Verifica se a API esta rodando.
 Invoke-RestMethod http://localhost:3000/health
 ```
 
-### GET /webhook/whatsapp
+### GET /whatsapp/status
 
-Prepara a verificacao futura do webhook da Meta.
-
-Exemplo local:
+Mostra se o bot esta habilitado e o estado atual da conexao.
 
 ```powershell
-Invoke-RestMethod "http://localhost:3000/webhook/whatsapp?hub.mode=subscribe&hub.verify_token=troque-este-token-local&hub.challenge=abc123"
+Invoke-RestMethod http://localhost:3000/whatsapp/status
 ```
 
-Resposta esperada:
+## Respostas automaticas
+
+O bot responde mensagens de texto com regras simples:
+
+- cultos, horarios ou programacao;
+- localizacao/endereco;
+- pedido de oracao;
+- contato/atendimento humano;
+- resposta padrao para mensagens fora do escopo.
+
+Por seguranca operacional, o bot:
+
+- ignora grupos por padrao;
+- ignora mensagens enviadas pelo proprio numero;
+- limita resposta por contato usando `WHATSAPP_MIN_REPLY_INTERVAL_MS`;
+- nao faz disparos em massa.
+
+## Deploy
+
+O Render ainda pode hospedar o servidor HTTP, mas o modo Baileys precisa de sessao persistente. Render Free nao e adequado para manter o bot em producao porque a instancia pode dormir e o filesystem local nao e persistente entre reinicios/deploys.
+
+Documentacao:
 
 ```text
-abc123
+backend/docs/baileys-whatsapp-setup.md
+backend/docs/deploy-render.md
 ```
 
-### POST /webhook/whatsapp
+## Escopo fora do MVP atual
 
-Recebe payloads simulados, registra logs basicos das mensagens recebidas e tenta enviar uma resposta automatica. Sem credenciais da Meta, o envio e ignorado com seguranca.
-
-```powershell
-$body = @{
-  messages = @(
-    @{
-      from = "5521974350384"
-      id = "wamid.test"
-      timestamp = "1710000000"
-      type = "text"
-      text = @{
-        body = "Ola, gostaria de saber os horarios dos cultos."
-      }
-    }
-  )
-} | ConvertTo-Json -Depth 10
-
-Invoke-RestMethod `
-  -Method Post `
-  -Uri "http://localhost:3000/webhook/whatsapp" `
-  -ContentType "application/json" `
-  -Body $body
-```
-
-Resposta esperada:
-
-```json
-{
-  "replies": {
-    "failed": 0,
-    "sent": 0,
-    "skipped": 1
-  },
-  "status": "received",
-  "receivedMessages": 1
-}
-```
-
-## Escopo fora do MVP 1
-
-- Templates aprovados pela Meta.
-- Mensagens ativas fora da janela de 24 horas.
-- Banco de dados.
-- Cadastro de contatos.
+- Painel CRM.
+- Historico de conversas em banco.
+- Atendimento humano pelo painel.
 - IA com Gemini.
-- Painel administrativo.
-
-## Proxima etapa: Meta
-
-O checklist para conectar o webhook na WhatsApp Cloud API esta em:
-
-```text
-backend/docs/meta-whatsapp-setup.md
-```
+- Hospedagem definitiva com disco persistente.

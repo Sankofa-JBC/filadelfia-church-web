@@ -5,6 +5,7 @@ Thumbs.db
 coverage/
 backend/node_modules/
 backend/dist/
+backend/.session/
 backend/.env
 backend/.env.*
 !backend/.env.example

@@ -1,6 +1,6 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import { registerHealthRoutes } from "./routes/health.routes.js";
-import { registerWhatsAppWebhookRoutes } from "./routes/whatsapp-webhook.routes.js";
+import { registerWhatsAppStatusRoutes } from "./routes/whatsapp-status.routes.js";
 
 export interface BuildAppOptions {
   logger?: boolean;
@@ -12,7 +12,7 @@ export const buildApp = (options: BuildAppOptions = {}): FastifyInstance => {
   });
 
   void app.register(registerHealthRoutes);
-  void app.register(registerWhatsAppWebhookRoutes);
+  void app.register(registerWhatsAppStatusRoutes);
 
   return app;
 };

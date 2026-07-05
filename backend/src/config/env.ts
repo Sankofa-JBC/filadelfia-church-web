@@ -4,10 +4,10 @@ export interface AppEnv {
   nodeEnv: string;
   port: number;
   host: string;
-  whatsappVerifyToken: string;
-  metaGraphApiVersion: string;
-  metaWhatsAppAccessToken?: string;
-  metaWhatsAppPhoneNumberId?: string;
+  whatsappBotEnabled: boolean;
+  whatsappIgnoreGroups: boolean;
+  whatsappMinReplyIntervalMs: number;
+  whatsappSessionDir: string;
 }
 
 const parsePort = (value: string | undefined): number => {
@@ -20,23 +20,42 @@ const parsePort = (value: string | undefined): number => {
   return port;
 };
 
+const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+
+  return ["1", "true", "yes", "on"].includes(value.toLowerCase());
+};
+
+const parseNonNegativeInteger = (
+  name: string,
+  value: string | undefined,
+  defaultValue: number
+): number => {
+  const parsed = Number(value ?? defaultValue);
+
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw new Error(`${name} must be a non-negative integer.`);
+  }
+
+  return parsed;
+};
+
 export const getEnv = (): AppEnv => {
   const nodeEnv = process.env.NODE_ENV ?? "development";
-  const whatsappVerifyToken =
-    process.env.WHATSAPP_VERIFY_TOKEN ??
-    (nodeEnv === "production" ? "" : "local-dev-verify-token");
-
-  if (nodeEnv === "production" && whatsappVerifyToken.length === 0) {
-    throw new Error("WHATSAPP_VERIFY_TOKEN is required in production.");
-  }
 
   return {
     nodeEnv,
     port: parsePort(process.env.PORT),
     host: process.env.HOST ?? "0.0.0.0",
-    whatsappVerifyToken,
-    metaGraphApiVersion: process.env.META_GRAPH_API_VERSION ?? "v24.0",
-    metaWhatsAppAccessToken: process.env.META_WHATSAPP_ACCESS_TOKEN || undefined,
-    metaWhatsAppPhoneNumberId: process.env.META_WHATSAPP_PHONE_NUMBER_ID || undefined
+    whatsappBotEnabled: parseBoolean(process.env.WHATSAPP_BOT_ENABLED, false),
+    whatsappIgnoreGroups: parseBoolean(process.env.WHATSAPP_IGNORE_GROUPS, true),
+    whatsappMinReplyIntervalMs: parseNonNegativeInteger(
+      "WHATSAPP_MIN_REPLY_INTERVAL_MS",
+      process.env.WHATSAPP_MIN_REPLY_INTERVAL_MS,
+      60_000
+    ),
+    whatsappSessionDir: process.env.WHATSAPP_SESSION_DIR ?? ".session/baileys"
   };
 };

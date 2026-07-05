@@ -1,13 +1,14 @@
 # Deploy do backend no Render
 
-Este projeto usa Render para o primeiro deploy publico do backend porque ele aceita um servidor Node.js comum, fornece HTTPS e permite configurar variaveis secretas sem colocar tokens no Git.
+O Render continua podendo hospedar o servidor HTTP do backend, mas o modo de automacao via Baileys nao deve depender do Render Free para producao.
 
 ## Objetivo
 
-Publicar o backend em uma URL HTTPS para que a Meta consiga chamar:
+Manter uma URL publica para health check e status:
 
 ```text
-https://SEU-BACKEND.onrender.com/webhook/whatsapp
+https://SEU-BACKEND.onrender.com/health
+https://SEU-BACKEND.onrender.com/whatsapp/status
 ```
 
 ## Configuracao criada
@@ -19,19 +20,19 @@ O arquivo `render.yaml` na raiz do repositorio define:
 - build com `npm ci --include=dev && npm run build`;
 - start com `npm start`;
 - health check em `/health`;
-- variaveis sensiveis como `sync: false`.
+- bot desligado por padrao em hospedagem sem armazenamento persistente.
 
 ## Passo a passo
 
 1. Acesse o Render e conecte o repositorio `Sankofa-JBC/filadelfia-church-web`.
 2. Crie um novo Blueprint usando o arquivo `render.yaml`.
-3. Preencha as variaveis secretas solicitadas:
+3. Confira as variaveis:
 
 ```text
-WHATSAPP_VERIFY_TOKEN=crie-um-token-forte
-META_WHATSAPP_ACCESS_TOKEN=preencher-depois
-META_WHATSAPP_PHONE_NUMBER_ID=preencher-depois
-META_GRAPH_API_VERSION=v24.0
+WHATSAPP_BOT_ENABLED=false
+WHATSAPP_SESSION_DIR=.session/baileys
+WHATSAPP_IGNORE_GROUPS=true
+WHATSAPP_MIN_REPLY_INTERVAL_MS=60000
 ```
 
 4. Aguarde o deploy terminar.
@@ -52,9 +53,9 @@ Resposta esperada:
 
 ## Observacoes
 
-- O plano gratuito pode dormir apos um periodo sem uso. Para webhook real em producao, isso pode atrasar a primeira resposta.
-- Nao coloque tokens reais em `.env.example`, README, commits ou mensagens publicas.
-- A URL do Render sera usada no painel da Meta como Callback URL do webhook.
+- O plano gratuito pode dormir apos um periodo sem uso.
+- Render Free nao preserva arquivos locais entre reinicios/deploys, entao nao e adequado para manter a sessao do Baileys em producao.
+- Para o bot real, rode localmente ou em uma hospedagem com disco persistente.
 
 ## Se precisar editar manualmente no Render
 

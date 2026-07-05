@@ -25,7 +25,7 @@ https://sankofa-jbc.github.io/filadelfia-church-web/
 
 ## Backend
 
-O backend fica isolado em `backend/` e prepara o MVP inicial para uma futura automacao oficial de WhatsApp.
+O backend fica isolado em `backend/` e prepara a automacao de WhatsApp via Baileys/WhatsApp Web, sem a API oficial da Meta.
 
 Para detalhes de configuracao e execucao local:
 
