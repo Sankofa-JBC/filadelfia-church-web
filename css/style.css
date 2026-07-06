@@ -321,7 +321,7 @@ select {
 }
 
 .hero {
-  min-height: 560px;
+  min-height: 500px;
   position: relative;
   overflow: hidden;
   color: #fff;
@@ -352,41 +352,14 @@ select {
 }
 
 .hero__content {
-  min-height: 560px;
+  min-height: 500px;
   position: relative;
   z-index: 1;
   display: grid;
   align-content: center;
   justify-items: center;
-  padding-top: 104px;
+  padding-top: 92px;
   text-align: center;
-}
-
-.ornament {
-  width: 76px;
-  height: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  margin-bottom: 28px;
-  color: var(--gold-strong);
-}
-
-.ornament::before,
-.ornament::after {
-  content: "";
-  width: 28px;
-  height: 2px;
-  border-radius: 999px;
-  background: currentColor;
-}
-
-.ornament span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: currentColor;
 }
 
 .hero h1,
@@ -751,7 +724,7 @@ select {
 }
 
 .page-hero {
-  min-height: 360px;
+  min-height: 300px;
   position: relative;
   overflow: hidden;
   color: #fff;
@@ -779,13 +752,13 @@ select {
 }
 
 .page-hero__content {
-  min-height: 360px;
+  min-height: 300px;
   position: relative;
   z-index: 1;
   display: grid;
   align-content: center;
   justify-items: center;
-  padding-top: 104px;
+  padding-top: 88px;
   text-align: center;
 }
 
@@ -1193,7 +1166,7 @@ select {
 
   .hero,
   .hero__content {
-    min-height: 600px;
+    min-height: 540px;
   }
 
   .hero__image {
@@ -1201,7 +1174,7 @@ select {
   }
 
   .hero__content {
-    padding-top: 96px;
+    padding-top: 86px;
   }
 
   .hero h1 {
@@ -1234,11 +1207,11 @@ select {
 
   .page-hero,
   .page-hero__content {
-    min-height: 340px;
+    min-height: 290px;
   }
 
   .page-hero__content {
-    padding-top: 96px;
+    padding-top: 84px;
   }
 
   .page-hero h1 {
@@ -1286,7 +1259,7 @@ select {
 
   .hero,
   .hero__content {
-    min-height: 620px;
+    min-height: 560px;
   }
 
   .hero__image {
@@ -1302,11 +1275,7 @@ select {
   }
 
   .hero__content {
-    padding-top: 90px;
-  }
-
-  .ornament {
-    margin-bottom: 22px;
+    padding-top: 82px;
   }
 
   .hero h1 {
@@ -1421,11 +1390,11 @@ select {
 
   .page-hero,
   .page-hero__content {
-    min-height: 330px;
+    min-height: 280px;
   }
 
   .page-hero__content {
-    padding-top: 88px;
+    padding-top: 80px;
   }
 
   .page-hero h1 {
