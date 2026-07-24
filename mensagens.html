@@ -52,20 +52,70 @@
     </section>
 
     <section class="content-section">
-      <div class="container message-grid">
-        <article class="content-card">
-          <p class="eyebrow">Em breve</p>
-          <h2>Prega&ccedil;&otilde;es e estudos</h2>
-          <p>Estamos preparando este espa&ccedil;o para reunir mensagens, estudos b&iacute;blicos e devocionais da igreja.</p>
-          <p>Enquanto isso, fale conosco para acompanhar os cultos online e receber novidades.</p>
-        </article>
+      <div class="container messages-layout">
+        <aside class="content-card message-tools" aria-labelledby="message-tools-title">
+          <p class="eyebrow">Biblioteca</p>
+          <h2 id="message-tools-title">Encontre uma mensagem</h2>
+          <label class="field-group" for="messageSearch">
+            <span>Buscar por palavra</span>
+            <input id="messageSearch" type="search" placeholder="Ex.: ora&ccedil;&atilde;o, fam&iacute;lia, f&eacute;" data-message-search />
+          </label>
 
-        <aside class="content-card content-card--dark">
-          <p class="eyebrow">Acompanhe</p>
-          <h2>Receba novidades</h2>
-          <p>Envie uma mensagem pelo WhatsApp para saber sobre cultos, programa&ccedil;&atilde;o e conte&uacute;dos da igreja.</p>
-          <a class="button button--gold" href="https://wa.me/5521974350384" target="_blank" rel="noopener">Falar no WhatsApp</a>
+          <div class="filter-group" aria-label="Filtrar mensagens por tema">
+            <button class="filter-chip is-active" type="button" data-message-filter="todos">Todos</button>
+            <button class="filter-chip" type="button" data-message-filter="fe">F&eacute;</button>
+            <button class="filter-chip" type="button" data-message-filter="oracao">Ora&ccedil;&atilde;o</button>
+            <button class="filter-chip" type="button" data-message-filter="familia">Fam&iacute;lia</button>
+            <button class="filter-chip" type="button" data-message-filter="ensino">Ensino</button>
+            <button class="filter-chip" type="button" data-message-filter="culto">Culto</button>
+          </div>
         </aside>
+
+        <div class="message-results" aria-live="polite">
+          <article class="message-card" data-message-card data-message-category="fe" data-message-text="fe coragem esperanca jesus cristo">
+            <p class="eyebrow">F&eacute;</p>
+            <h2>Firmes em Cristo</h2>
+            <p>Uma reflex&atilde;o sobre confian&ccedil;a em Deus nos dias de press&atilde;o e incerteza.</p>
+            <a href="https://wa.me/5521974350384?text=Quero%20receber%20a%20mensagem%20Firmes%20em%20Cristo" target="_blank" rel="noopener">Solicitar mensagem</a>
+          </article>
+
+          <article class="message-card" data-message-card data-message-category="oracao" data-message-text="oracao busca deus vida devocional">
+            <p class="eyebrow">Ora&ccedil;&atilde;o</p>
+            <h2>Uma vida de ora&ccedil;&atilde;o</h2>
+            <p>Conte&uacute;do para fortalecer a rotina devocional e a depend&ecirc;ncia de Deus.</p>
+            <a href="https://wa.me/5521974350384?text=Quero%20receber%20a%20mensagem%20Uma%20vida%20de%20oracao" target="_blank" rel="noopener">Solicitar mensagem</a>
+          </article>
+
+          <article class="message-card" data-message-card data-message-category="familia" data-message-text="familia casa cuidado comunhao amor">
+            <p class="eyebrow">Fam&iacute;lia</p>
+            <h2>Cuidando da casa</h2>
+            <p>Uma palavra sobre amor, perd&atilde;o e cuidado espiritual dentro da fam&iacute;lia.</p>
+            <a href="https://wa.me/5521974350384?text=Quero%20receber%20a%20mensagem%20Cuidando%20da%20casa" target="_blank" rel="noopener">Solicitar mensagem</a>
+          </article>
+
+          <article class="message-card" data-message-card data-message-category="ensino" data-message-text="ensino palavra biblia discipulado aprendizado">
+            <p class="eyebrow">Ensino</p>
+            <h2>Aprendendo a Palavra</h2>
+            <p>Estudo introdut&oacute;rio para quem deseja crescer com base b&iacute;blica e simplicidade.</p>
+            <a href="https://wa.me/5521974350384?text=Quero%20receber%20a%20mensagem%20Aprendendo%20a%20Palavra" target="_blank" rel="noopener">Solicitar mensagem</a>
+          </article>
+
+          <article class="message-card" data-message-card data-message-category="culto" data-message-text="culto celebracao louvor comunhao igreja online">
+            <p class="eyebrow">Culto</p>
+            <h2>Culto de celebra&ccedil;&atilde;o</h2>
+            <p>Convite para participar dos encontros online aos domingos, com louvor e Palavra.</p>
+            <a href="https://wa.me/5521974350384?text=Quero%20saber%20sobre%20o%20culto%20de%20celebracao" target="_blank" rel="noopener">Solicitar informa&ccedil;&otilde;es</a>
+          </article>
+
+          <article class="message-card" data-message-card data-message-category="oracao" data-message-text="oracao quarta ensino renovacao fe">
+            <p class="eyebrow">Ora&ccedil;&atilde;o</p>
+            <h2>Renovo no meio da semana</h2>
+            <p>Mensagem ligada ao culto de quarta-feira, com foco em renova&ccedil;&atilde;o e ensino.</p>
+            <a href="https://wa.me/5521974350384?text=Quero%20saber%20sobre%20o%20culto%20de%20quarta" target="_blank" rel="noopener">Solicitar informa&ccedil;&otilde;es</a>
+          </article>
+
+          <p class="empty-state" data-message-empty>Nenhuma mensagem encontrada com esse filtro.</p>
+        </div>
       </div>
     </section>
   </main>
