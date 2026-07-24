@@ -1,44 +1,109 @@
-const menu = document.querySelector('[data-menu]');
-const menuToggle = document.querySelector('[data-menu-toggle]');
-const yearTarget = document.querySelector('[data-current-year]');
-const header = document.querySelector('[data-header]');
-const hero = document.querySelector('.hero');
 const whatsappUrl = 'https://wa.me/5521974350384';
 
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const normalizeText = (value) =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
 
-if (yearTarget) {
-  yearTarget.textContent = new Date().getFullYear();
-}
+const runWhenIdle = (callback, timeout = 900) => {
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(callback, { timeout });
+    return;
+  }
 
-if (header) {
+  window.setTimeout(callback, Math.min(timeout, 300));
+};
+
+const initCurrentYear = () => {
+  const yearTarget = document.querySelector('[data-current-year]');
+
+  if (yearTarget) {
+    yearTarget.textContent = new Date().getFullYear();
+  }
+};
+
+const initHeader = () => {
+  const header = document.querySelector('[data-header]');
+
+  if (!header) {
+    return;
+  }
+
   const setHeaderState = () => {
     header.classList.toggle('is-scrolled', window.scrollY > 18);
   };
 
   setHeaderState();
   window.addEventListener('scroll', setHeaderState, { passive: true });
-}
+};
 
-document.querySelectorAll('.primary-nav a').forEach((link) => {
-  const linkUrl = new URL(link.getAttribute('href'), window.location.href);
+const initActiveNavigation = () => {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  const linkPage = linkUrl.pathname.split('/').pop() || 'index.html';
 
-  link.classList.toggle('is-active', linkPage === currentPage);
-});
+  document.querySelectorAll('.primary-nav a').forEach((link) => {
+    const linkUrl = new URL(link.getAttribute('href'), window.location.href);
+    const linkPage = linkUrl.pathname.split('/').pop() || 'index.html';
+    const isCurrent = linkPage === currentPage;
 
-if (menu && menuToggle) {
-  const setMenuState = (isOpen) => {
+    link.classList.toggle('is-active', isCurrent);
+
+    if (isCurrent) {
+      link.setAttribute('aria-current', 'page');
+    } else {
+      link.removeAttribute('aria-current');
+    }
+  });
+};
+
+const initMobileMenu = () => {
+  const menu = document.querySelector('[data-menu]');
+  const menuToggle = document.querySelector('[data-menu-toggle]');
+
+  if (!menu || !menuToggle) {
+    return;
+  }
+
+  let focusedBeforeOpen = null;
+
+  const getFocusableMenuItems = () =>
+    menu.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+
+  const focusFirstMenuItem = () => {
+    const firstItem = getFocusableMenuItems()[0];
+
+    if (firstItem instanceof HTMLElement) {
+      firstItem.focus();
+    }
+  };
+
+  const setMenuState = (isOpen, shouldRestoreFocus = false) => {
+    const wasOpen = menu.classList.contains('is-open');
+
+    if (isOpen && !wasOpen) {
+      focusedBeforeOpen = document.activeElement instanceof HTMLElement ? document.activeElement : menuToggle;
+    }
+
     menu.classList.toggle('is-open', isOpen);
     menuToggle.classList.toggle('is-open', isOpen);
     document.body.classList.toggle('menu-is-open', isOpen);
     menuToggle.setAttribute('aria-expanded', String(isOpen));
     menuToggle.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+
+    if (isOpen) {
+      window.requestAnimationFrame(focusFirstMenuItem);
+      return;
+    }
+
+    if (wasOpen && shouldRestoreFocus && focusedBeforeOpen instanceof HTMLElement) {
+      focusedBeforeOpen.focus();
+    }
   };
 
   menuToggle.addEventListener('click', () => {
-    setMenuState(!menu.classList.contains('is-open'));
+    const willOpen = !menu.classList.contains('is-open');
+    setMenuState(willOpen, true);
   });
 
   menu.querySelectorAll('a').forEach((link) => {
@@ -59,114 +124,37 @@ if (menu && menuToggle) {
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-      setMenuState(false);
+      setMenuState(false, true);
     }
   });
-}
-
-if (!prefersReducedMotion && 'IntersectionObserver' in window) {
-  const revealTargets = document.querySelectorAll(
-    '.verse, .services .section-heading, .service-card, .welcome-card, .page-ribbon, .content-card, .map-placeholder, .schedule-grid > *, .values-grid > *, .message-grid > *, .faq-item, .timeline-list > *, .gallery-item, .message-card'
-  );
-
-  revealTargets.forEach((target) => target.classList.add('reveal-on-scroll'));
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      rootMargin: '0px 0px -12% 0px',
-      threshold: 0.12
-    }
-  );
-
-  revealTargets.forEach((target) => observer.observe(target));
-}
-
-if (hero && !prefersReducedMotion) {
-  const canUseParallax = window.matchMedia('(min-width: 981px)').matches;
-  let ticking = false;
-
-  const updateHeroParallax = () => {
-    ticking = false;
-
-    if (!canUseParallax) {
-      hero.style.removeProperty('--hero-parallax-y');
-      return;
-    }
-
-    const heroRect = hero.getBoundingClientRect();
-    const isHeroVisible = heroRect.bottom > 0 && heroRect.top < window.innerHeight;
-
-    if (!isHeroVisible) {
-      return;
-    }
-
-    const offset = Math.min(Math.max(window.scrollY * 0.12, 0), 42);
-    hero.style.setProperty('--hero-parallax-y', `${offset}px`);
-  };
-
-  const requestParallaxUpdate = () => {
-    if (!ticking) {
-      window.requestAnimationFrame(updateHeroParallax);
-      ticking = true;
-    }
-  };
-
-  updateHeroParallax();
-  window.addEventListener('scroll', requestParallaxUpdate, { passive: true });
-}
-
-const createFloatingWhatsapp = () => {
-  const link = document.createElement('a');
-  link.className = 'floating-whatsapp';
-  link.href = `${whatsappUrl}?text=${encodeURIComponent('Ola! Vim pelo site da Igreja Missionaria Filadelfia.')}`;
-  link.target = '_blank';
-  link.rel = 'noopener';
-  link.setAttribute('aria-label', 'Falar com a igreja pelo WhatsApp');
-  link.innerHTML = `
-    <svg aria-hidden="true" viewBox="0 0 24 24">
-      <path d="M20.1 3.9A11.8 11.8 0 0 0 1.7 18.2L.4 23.4l5.3-1.4A11.8 11.8 0 0 0 20.1 3.9Zm-8.3 16a9.7 9.7 0 0 1-4.9-1.3l-.4-.2-3.1.8.8-3-.2-.4a9.6 9.6 0 1 1 7.8 4.1Zm5.3-7.2c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.2-.2.3-.8.9-1 1.1-.2.2-.4.2-.7.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.6-1.6-1.9-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5.1-.2.1-.4 0-.6 0-.1-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.8 0 1.7 1.2 3.3 1.4 3.5.2.2 2.4 3.7 5.8 5.1.8.4 1.5.6 2 .7.8.3 1.6.2 2.2.1.7-.1 1.7-.7 1.9-1.3.2-.6.2-1.2.2-1.3-.1-.1-.3-.2-.6-.4Z" />
-    </svg>
-  `;
-  document.body.append(link);
 };
 
-createFloatingWhatsapp();
-
-document.querySelectorAll('.faq-item').forEach((item) => {
-  item.addEventListener('toggle', () => {
-    if (!item.open) {
-      return;
-    }
-
-    document.querySelectorAll('.faq-item[open]').forEach((openItem) => {
-      if (openItem !== item) {
-        openItem.open = false;
+const initFaq = () => {
+  document.querySelectorAll('.faq-item').forEach((item) => {
+    item.addEventListener('toggle', () => {
+      if (!item.open) {
+        return;
       }
+
+      document.querySelectorAll('.faq-item[open]').forEach((openItem) => {
+        if (openItem !== item) {
+          openItem.open = false;
+        }
+      });
     });
   });
-});
+};
 
-const normalizeText = (value) =>
-  value
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim();
+const initMessageFilters = () => {
+  const messageSearch = document.querySelector('[data-message-search]');
+  const messageFilters = document.querySelectorAll('[data-message-filter]');
+  const messageCards = document.querySelectorAll('[data-message-card]');
+  const messageEmpty = document.querySelector('[data-message-empty]');
 
-const messageSearch = document.querySelector('[data-message-search]');
-const messageFilters = document.querySelectorAll('[data-message-filter]');
-const messageCards = document.querySelectorAll('[data-message-card]');
-const messageEmpty = document.querySelector('[data-message-empty]');
+  if (messageCards.length === 0) {
+    return;
+  }
 
-if (messageCards.length > 0) {
   let activeFilter = 'todos';
 
   const filterMessages = () => {
@@ -192,26 +180,34 @@ if (messageCards.length > 0) {
   messageSearch?.addEventListener('input', filterMessages);
 
   messageFilters.forEach((button) => {
+    button.setAttribute('aria-pressed', String(button.classList.contains('is-active')));
+
     button.addEventListener('click', () => {
       activeFilter = button.dataset.messageFilter || 'todos';
       messageFilters.forEach((filterButton) => {
-        filterButton.classList.toggle('is-active', filterButton === button);
+        const isActive = filterButton === button;
+        filterButton.classList.toggle('is-active', isActive);
+        filterButton.setAttribute('aria-pressed', String(isActive));
       });
       filterMessages();
     });
   });
 
   filterMessages();
-}
+};
 
-const lightboxButtons = document.querySelectorAll('[data-lightbox-src]');
+const initLightbox = () => {
+  const lightboxButtons = document.querySelectorAll('[data-lightbox-src]');
 
-if (lightboxButtons.length > 0) {
-  const lightbox = document.createElement('div');
+  if (lightboxButtons.length === 0 || !('HTMLDialogElement' in window)) {
+    return;
+  }
+
+  const lightbox = document.createElement('dialog');
   lightbox.className = 'lightbox';
-  lightbox.hidden = true;
+  lightbox.setAttribute('aria-label', 'Imagem ampliada');
   lightbox.innerHTML = `
-    <div class="lightbox__dialog" role="dialog" aria-modal="true" aria-label="Imagem ampliada">
+    <div class="lightbox__dialog">
       <button class="lightbox__close" type="button" aria-label="Fechar imagem">&times;</button>
       <img alt="" />
       <p></p>
@@ -219,38 +215,47 @@ if (lightboxButtons.length > 0) {
   `;
   document.body.append(lightbox);
 
+  const lightboxDialog = lightbox.querySelector('.lightbox__dialog');
   const lightboxImage = lightbox.querySelector('img');
   const lightboxCaption = lightbox.querySelector('p');
   const lightboxClose = lightbox.querySelector('.lightbox__close');
+  let activeTrigger = null;
 
   const closeLightbox = () => {
-    lightbox.hidden = true;
-    document.body.classList.remove('menu-is-open');
+    if (lightbox.open) {
+      lightbox.close();
+    }
   };
 
   lightboxButtons.forEach((button) => {
     button.addEventListener('click', () => {
+      activeTrigger = button;
       lightboxImage.src = button.dataset.lightboxSrc || '';
       lightboxImage.alt = button.querySelector('img')?.alt || '';
       lightboxCaption.textContent = button.dataset.lightboxCaption || '';
-      lightbox.hidden = false;
-      document.body.classList.add('menu-is-open');
+      lightbox.showModal();
       lightboxClose.focus();
     });
   });
 
   lightboxClose.addEventListener('click', closeLightbox);
+
   lightbox.addEventListener('click', (event) => {
-    if (event.target === lightbox) {
-      closeLightbox();
+    if (!lightboxDialog || event.target !== lightbox) {
+      return;
+    }
+
+    closeLightbox();
+  });
+
+  lightbox.addEventListener('close', () => {
+    lightboxImage.removeAttribute('src');
+
+    if (activeTrigger instanceof HTMLElement) {
+      activeTrigger.focus();
     }
   });
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !lightbox.hidden) {
-      closeLightbox();
-    }
-  });
-}
+};
 
 const padDateValue = (value) => String(value).padStart(2, '0');
 
@@ -275,72 +280,163 @@ const getNextServiceDate = ({ weekday, hour, minute }) => {
 const escapeCalendarText = (value) =>
   value.replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\n/g, '\\n');
 
-document.querySelectorAll('[data-calendar-button]').forEach((button) => {
-  button.addEventListener('click', () => {
-    const title = button.dataset.calendarTitle || 'Culto online';
-    const weekday = Number(button.dataset.calendarWeekday);
-    const hour = Number(button.dataset.calendarHour);
-    const minute = Number(button.dataset.calendarMinute);
-    const startsAt = getNextServiceDate({ weekday, hour, minute });
-    const endsAt = new Date(startsAt.getTime() + 90 * 60 * 1000);
-    const filename = `${normalizeText(title).replace(/\s+/g, '-')}.ics`;
-    const calendarBody = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//Igreja Missionaria Filadelfia//Site//PT-BR',
-      'CALSCALE:GREGORIAN',
-      'BEGIN:VEVENT',
-      `UID:${Date.now()}-${filename}@filadelfia`,
-      `DTSTART;TZID=America/Sao_Paulo:${formatDateForCalendar(startsAt)}`,
-      `DTEND;TZID=America/Sao_Paulo:${formatDateForCalendar(endsAt)}`,
-      'RRULE:FREQ=WEEKLY',
-      `SUMMARY:${escapeCalendarText(title)}`,
-      'DESCRIPTION:Culto online da Igreja Missionaria Filadelfia Jesus Cristo Reina',
-      'LOCATION:Online',
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ].join('\r\n');
+const initCalendarButtons = () => {
+  document.querySelectorAll('[data-calendar-button]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const title = button.dataset.calendarTitle || 'Culto online';
+      const weekday = Number(button.dataset.calendarWeekday);
+      const hour = Number(button.dataset.calendarHour);
+      const minute = Number(button.dataset.calendarMinute);
+      const startsAt = getNextServiceDate({ weekday, hour, minute });
+      const endsAt = new Date(startsAt.getTime() + 90 * 60 * 1000);
+      const filename = `${normalizeText(title).replace(/\s+/g, '-')}.ics`;
+      const calendarBody = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Igreja Missionaria Filadelfia//Site//PT-BR',
+        'CALSCALE:GREGORIAN',
+        'BEGIN:VEVENT',
+        `UID:${Date.now()}-${filename}@filadelfia`,
+        `DTSTART;TZID=America/Sao_Paulo:${formatDateForCalendar(startsAt)}`,
+        `DTEND;TZID=America/Sao_Paulo:${formatDateForCalendar(endsAt)}`,
+        'RRULE:FREQ=WEEKLY',
+        `SUMMARY:${escapeCalendarText(title)}`,
+        'DESCRIPTION:Culto online da Igreja Missionaria Filadelfia Jesus Cristo Reina',
+        'LOCATION:Online',
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
 
-    const file = new Blob([calendarBody], { type: 'text/calendar;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(file);
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(link.href);
+      const file = new Blob([calendarBody], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(file);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
   });
-});
+};
 
-document.querySelectorAll('[data-copy-location]').forEach((button) => {
-  button.addEventListener('click', async () => {
-    const location = button.dataset.copyLocation || '';
-    const originalText = button.textContent;
+const initCopyLocation = () => {
+  document.querySelectorAll('[data-copy-location]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const location = button.dataset.copyLocation || '';
+      const originalText = button.textContent;
 
-    try {
-      await navigator.clipboard.writeText(location);
-    } catch {
-      const helper = document.createElement('textarea');
-      helper.value = location;
-      helper.setAttribute('readonly', '');
-      helper.style.position = 'fixed';
-      helper.style.left = '-9999px';
-      document.body.append(helper);
-      helper.select();
-      document.execCommand('copy');
-      helper.remove();
+      try {
+        await navigator.clipboard.writeText(location);
+      } catch {
+        const helper = document.createElement('textarea');
+        helper.value = location;
+        helper.setAttribute('readonly', '');
+        helper.style.position = 'fixed';
+        helper.style.left = '-9999px';
+        document.body.append(helper);
+        helper.select();
+        document.execCommand('copy');
+        helper.remove();
+      }
+
+      button.textContent = 'Copiado';
+      window.setTimeout(() => {
+        button.textContent = originalText;
+      }, 1800);
+    });
+  });
+};
+
+const initDeferredMaps = () => {
+  const mapEmbeds = document.querySelectorAll('[data-map-embed]');
+
+  if (mapEmbeds.length === 0) {
+    return;
+  }
+
+  const loadMap = (embed) => {
+    if (embed.classList.contains('is-loading') || embed.classList.contains('is-loaded')) {
+      return;
     }
 
-    button.textContent = 'Copiado';
-    window.setTimeout(() => {
-      button.textContent = originalText;
-    }, 1800);
-  });
-});
+    const iframe = embed.querySelector('[data-map-frame]');
+    const src = iframe?.dataset.mapSrc || embed.dataset.mapSrc;
 
-const contactForm = document.querySelector('[data-contact-form]');
+    if (!(iframe instanceof HTMLIFrameElement) || !src) {
+      embed.classList.add('has-failed');
+      return;
+    }
 
-if (contactForm) {
+    embed.classList.add('is-loading');
+
+    const failTimer = window.setTimeout(() => {
+      if (!embed.classList.contains('is-loaded')) {
+        embed.classList.add('has-failed');
+      }
+    }, 12000);
+
+    iframe.addEventListener(
+      'load',
+      () => {
+        window.clearTimeout(failTimer);
+        embed.classList.add('is-loaded');
+        embed.classList.remove('has-failed');
+      },
+      { once: true }
+    );
+
+    runWhenIdle(() => {
+      iframe.src = src;
+    }, 1200);
+  };
+
+  if (!('IntersectionObserver' in window)) {
+    mapEmbeds.forEach(loadMap);
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          loadMap(entry.target);
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      rootMargin: '400px 0px',
+      threshold: 0.01
+    }
+  );
+
+  mapEmbeds.forEach((embed) => observer.observe(embed));
+};
+
+const initContactForm = () => {
+  const contactForm = document.querySelector('[data-contact-form]');
+
+  if (!contactForm) {
+    return;
+  }
+
   const status = contactForm.querySelector('[data-form-status]');
   const getField = (name) => contactForm.elements.namedItem(name);
+
+  const ensureFieldAccessibility = (name) => {
+    const field = getField(name);
+    const errorTarget = contactForm.querySelector(`[data-error-for="${name}"]`);
+
+    if (!(field instanceof HTMLElement) || !errorTarget) {
+      return;
+    }
+
+    if (!errorTarget.id) {
+      errorTarget.id = `${field.id || name}Error`;
+    }
+
+    field.setAttribute('aria-describedby', errorTarget.id);
+    field.setAttribute('aria-invalid', 'false');
+  };
+
   const setError = (name, message) => {
     const field = getField(name);
     const wrapper = field?.closest('.field-group');
@@ -348,10 +444,16 @@ if (contactForm) {
 
     wrapper?.classList.toggle('has-error', Boolean(message));
 
+    if (field instanceof HTMLElement) {
+      field.setAttribute('aria-invalid', String(Boolean(message)));
+    }
+
     if (errorTarget) {
       errorTarget.textContent = message;
     }
   };
+
+  ['name', 'phone', 'message'].forEach(ensureFieldAccessibility);
 
   const validateContactForm = () => {
     const name = getField('name')?.value.trim() || '';
@@ -374,8 +476,14 @@ if (contactForm) {
     return { isValid: !firstInvalidField, firstInvalidField, name, phone, message };
   };
 
-  contactForm.addEventListener('input', () => {
-    status.textContent = '';
+  contactForm.addEventListener('input', (event) => {
+    if (status) {
+      status.textContent = '';
+    }
+
+    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+      setError(event.target.name, '');
+    }
   });
 
   contactForm.addEventListener('submit', (event) => {
@@ -385,7 +493,9 @@ if (contactForm) {
 
     if (!result.isValid) {
       result.firstInvalidField?.focus();
-      status.textContent = '';
+      if (status) {
+        status.textContent = '';
+      }
       return;
     }
 
@@ -396,7 +506,21 @@ if (contactForm) {
       `Mensagem: ${result.message}`
     ].join('\n');
 
-    status.textContent = 'Mensagem pronta para envio no WhatsApp.';
+    if (status) {
+      status.textContent = 'Mensagem pronta para envio no WhatsApp.';
+    }
     window.open(`${whatsappUrl}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
   });
-}
+};
+
+initCurrentYear();
+initHeader();
+initActiveNavigation();
+initMobileMenu();
+initFaq();
+initMessageFilters();
+initLightbox();
+initCalendarButtons();
+initCopyLocation();
+initDeferredMaps();
+initContactForm();

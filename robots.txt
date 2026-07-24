@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sankofa-jbc.github.io/filadelfia-church-web/sitemap.xml
